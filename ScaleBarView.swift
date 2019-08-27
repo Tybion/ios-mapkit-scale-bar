@@ -1,6 +1,8 @@
 //
 //  ScaleBarView.swift
-//  Mapa turystyczna
+//
+//  Code from sources below has been re-developed and tested by David Collins, Australia, 2019,
+//  for use with MapKit. Development environment: Xcode 10.3, Swift 5.
 //
 //  Based on code created by Roman Barzyczak on 21.10.2016.
 //  Copyright © 2016 Mapa Turystyczna. All rights reserved.
