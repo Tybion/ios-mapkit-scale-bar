@@ -7,20 +7,18 @@ Simple easy-to-read scale bar for MapView.  Text font, scale bar length and thic
   ```
   @IBOutlet weak var scaleBarView: ScaleBarView!
   ```
-  ```
+
   * create variable to remember the previous span value
+  ```
     var prevSpan: MKCoordinateSpan = MKCoordinateSpan(latitudeDelta: 0.00001, longitudeDelta: 0.00001)
   ```
   * In the map view in viewDidLoad(), pass the map view object to scaleBarView
   ```
     override func viewDidLoad() {
-        
         super.viewDidLoad()
-                
-        // Pass this mapView to the map scale bar
         scaleBarView.mapView = self.myMapView
   ```
-  * In the method that detects changes to the map view region, call setNeedsLayout() when the zoom level has changed significantly - for example when the span changes by more than 2%
+  * In the method that detects changes to the map view region, call setNeedsLayout() when the zoom level has changed significantly
   ```
       func mapView(_ mapView: MKMapView, regionDidChangeAnimated: Bool) {
   
@@ -36,3 +34,4 @@ Simple easy-to-read scale bar for MapView.  Text font, scale bar length and thic
         }
         
   ```
+  * Adjust the boldness of the bar, and the boldness and size of the text by configuring the XIB in Xcode
