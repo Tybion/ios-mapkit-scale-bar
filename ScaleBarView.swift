@@ -2,15 +2,18 @@
 //  ScaleBarView.swift
 //  Mapa turystyczna
 //
-//  Created by Roman Barzyczak on 21.10.2016.
+//  Based on code created by Roman Barzyczak on 21.10.2016.
 //  Copyright © 2016 Mapa Turystyczna. All rights reserved.
-//
+//  https://github.com/yoman07/ios-google-maps-scale-bar
+
+// Also based on code by Adrien Cognée Jan 5, 2017
+// How to visualize reusable xibs in storyboards using IBDesignable
+// https://medium.com/zenchef-tech-and-product/how-to-visualize-reusable-xibs-in-storyboards-using-ibdesignable-c0488c7f525d
+
 import UIKit
 import MapKit
 
 // ********************************************************************
-// https://github.com/yoman07/ios-google-maps-scale-bar
-
 @IBDesignable
 class ScaleBarView: UIView {
     
@@ -22,8 +25,8 @@ class ScaleBarView: UIView {
     @IBOutlet weak var distanceLabel: UILabel!
     
     // Shows how to add the XIB to the main storyboard ..
-    // https://medium.com/zenchef-tech-and-product/
-    // how-to-visualize-reusable-xibs-in-storyboards-using-ibdesignable-c0488c7f525d
+    // How to visualize reusable xibs in storyboards using IBDesignable
+    // https://medium.com/zenchef-tech-and-product/how-to-visualize-reusable-xibs-in-storyboards-using-ibdesignable-c0488c7f525d
 
     var contentView: UIView?
     @IBInspectable var nibName: String?
@@ -88,8 +91,12 @@ class ScaleBarView: UIView {
         // Get longitudes of west and east side of screen, at base of map.
         let rect = mapView.visibleMapRect
         let region = MKCoordinateRegion(rect)
+        
+        // Assuming the scale bar will be towards the bottom of the map
+        // If scale bar will be near the top, better to use topLeft and topRight
         let baseLeft = region.baseLeft()
         let baseRight = region.baseRight()
+        
         let screenDistance = baseLeft.distance(from: baseRight)
         let scaleDistance = barWidth/screenWidth * screenDistance
         let roundedDistance = scaleDistance.roundAsDistance()
@@ -146,5 +153,23 @@ extension CGFloat {
             i+=1
         }
         return roundedDistance
+    }
+}
+
+// ******************************
+extension MKCoordinateRegion {
+
+    func baseLeft() -> CLLocationCoordinate2D {
+        
+        let baseMap = center.latitude - span.latitudeDelta/2.0
+        let leftMap = center.longitude - span.longitudeDelta/2.0
+        return CLLocationCoordinate2D(latitude: baseMap, longitude: leftMap)
+    }
+
+    func baseRight() -> CLLocationCoordinate2D {
+        
+        let baseMap = center.latitude - span.latitudeDelta/2.0
+        let rightMap = center.longitude + span.longitudeDelta/2.0
+        return CLLocationCoordinate2D(latitude: baseMap, longitude: rightMap)
     }
 }
