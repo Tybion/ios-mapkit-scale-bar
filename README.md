@@ -5,7 +5,9 @@ Mapkit derivation of https://github.com/yoman07/ios-google-maps-scale-bar using 
 ![ScaleBarView](https://user-images.githubusercontent.com/4920031/63739451-93353000-c8d0-11e9-8c14-42455995a500.jpg)
 
   * Add the ScaleBarView XIB to the storyboard for the map, at the required location
-  * In the storyboard, set the background of the XIB to be clear (else it will have a white background)
+  * In the storyboard -
+    * set the background of the XIB to be clear (else it will have a white background)
+    * untick 'User interacction enabled' if the underlying map is interactive
   * Create an outlet for the ScaleBarView, in the map view
   ```
   @IBOutlet weak var scaleBarView: ScaleBarView!
