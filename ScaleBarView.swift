@@ -104,6 +104,7 @@ class ScaleBarView: UIView {
         let roundedDistance = scaleDistance.roundAsDistance()
         
         // App was crashing with failure in [NSLayoutConstraint _setSymbolicConstant:constant:]
+        // At broad zoom levels, scale changes from top to bottom of map, so scale bar value is not meaningful
         if mapView.zoomLevel < 3.0 {
             distanceLabel.text = ""
             return
