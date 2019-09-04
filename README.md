@@ -1,12 +1,12 @@
 # ios-mapkit-scale-bar
 Simple easy-to-read scale bar for MKMapView.  Text font, scale bar length and thickness are configurable. \
-Mapkit derivation of https://github.com/yoman07/ios-google-maps-scale-bar using Xcode 10.3, Swift 5.
+Derived from https://github.com/yoman07/ios-google-maps-scale-bar for Mapkit, using Xcode 10.3 & Swift 5.
 
 **ios-mapkit-scale-bar** \
 ![ScaleBarView](https://user-images.githubusercontent.com/4920031/63739451-93353000-c8d0-11e9-8c14-42455995a500.jpg)
 
-**Apple's MKScaleBarView in the default location** \
-_(includes text indicating the distance above the scale bar)_ \
+**Apple's MKScaleBarView at default location (for comparison)** \
+_(distance measurement is very hard to read, can't be enlarged)_ \
 ![MKScaleBarView](https://user-images.githubusercontent.com/4920031/64087061-b6ebf080-cd7e-11e9-879d-a45ed4faf948.jpg)
 
   * Add the ScaleBarView XIB to the storyboard for the map, at the required location
