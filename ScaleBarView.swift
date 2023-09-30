@@ -1,21 +1,16 @@
 //
 //  ScaleBarView.swift
+//  Mapa turystyczna
 //
-//  Code from sources below has been re-developed and tested by David Collins, Australia, 2019,
-//  for use with MapKit. Development environment: Xcode 10.3, Swift 5.
-//
-//  Based on code created by Roman Barzyczak on 21.10.2016.
+//  Created by Roman Barzyczak on 21.10.2016.
 //  Copyright © 2016 Mapa Turystyczna. All rights reserved.
-//  https://github.com/yoman07/ios-google-maps-scale-bar
-
-// Also based on code by Adrien Cognée Jan 5, 2017
-// How to visualize reusable xibs in storyboards using IBDesignable
-// https://medium.com/zenchef-tech-and-product/how-to-visualize-reusable-xibs-in-storyboards-using-ibdesignable-c0488c7f525d
-
+//
 import UIKit
 import MapKit
 
 // ********************************************************************
+// https://github.com/yoman07/ios-google-maps-scale-bar
+
 @IBDesignable
 class ScaleBarView: UIView {
     
@@ -27,8 +22,8 @@ class ScaleBarView: UIView {
     @IBOutlet weak var distanceLabel: UILabel!
     
     // Shows how to add the XIB to the main storyboard ..
-    // How to visualize reusable xibs in storyboards using IBDesignable
-    // https://medium.com/zenchef-tech-and-product/how-to-visualize-reusable-xibs-in-storyboards-using-ibdesignable-c0488c7f525d
+    // https://medium.com/zenchef-tech-and-product/
+    // how-to-visualize-reusable-xibs-in-storyboards-using-ibdesignable-c0488c7f525d
 
     var contentView: UIView?
     @IBInspectable var nibName: String?
@@ -62,18 +57,6 @@ class ScaleBarView: UIView {
         contentView?.prepareForInterfaceBuilder()
     }
     
-    // use .xib with same name
-    fileprivate func loadViewFromNib1() -> UIView {
-        
-        let nibName = String(describing: type(of: self))
-        if let views = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil) {
-            if let view = views[0] as? UIView {
-                return view
-            }
-        }
-        return UIView()
-    }
-    
     // ********************************************************************
     // https://github.com/yoman07/ios-google-maps-scale-bar ..
     // *************************************************
@@ -86,37 +69,80 @@ class ScaleBarView: UIView {
                 return
         }
         
-        //let projection = mapView.projection
         let screenWidth = mapView.frame.width
         let barWidth = self.frame.width
+        
+        // https://medium.com/@dmytrobabych/getting-actual-rotation-and-zoom-level-for-mapkit-mkmapview-e7f03f430aa9
+        //  mapView.region is bigger than iPhone screen when rotated.
+        // it is the ns-ew aligned bounding box of the rotated map
         
         // Get longitudes of west and east side of screen, at base of map.
         let rect = mapView.visibleMapRect
         let region = MKCoordinateRegion(rect)
         
-        // Assuming the scale bar will be towards the bottom of the map
-        // If scale bar will be near the top, better to use topLeft and topRight
-        let baseLeft = region.baseLeft()
-        let baseRight = region.baseRight()
+        var screenDistance: CLLocationDistance      // metres
+        if mapView.camera.heading == 0 {
+            // simple, usual case
+            let baseLeft = region.baseLeft()
+            let baseRight = region.baseRight()
+            screenDistance = baseLeft.distance(from: baseRight)     // METRES
+        } else {
+            // for when map has been rotated within the screen
+            screenDistance = spanAdjustedForRotation(
+                            mapView.camera.heading, mapView, region)
+        }
         
-        let screenDistance = baseLeft.distance(from: baseRight)
-        let scaleDistance = barWidth/screenWidth * screenDistance
-        let roundedDistance = scaleDistance.roundAsDistance()
+        let scaleBarDistance: CGFloat = barWidth/screenWidth * screenDistance
+        let roundedDistance = scaleBarDistance.roundAsDistance()
         
         // App was crashing with failure in [NSLayoutConstraint _setSymbolicConstant:constant:]
-        // At broad zoom levels, scale changes from top to bottom of map, so scale bar value is not meaningful
         if mapView.zoomLevel < 3.0 {
+            distanceLabel.text = ""
+            return
+        }
+        
+        // CRASH: Sep 2019 - NSLayoutConstraint constant is not finite! That's illegal.
+        //  - when setting scaleBarConstant.constant, below
+        // screenDistance might be zero => divide by zero
+        if screenDistance == 0.0 {
             distanceLabel.text = ""
             return
         }
 
         // Now adjust the scale bar length
         self.scaleBarConstant.constant = scaledBarWidth(
-                                    screenDistance, screenWidth,roundedDistance)
+                                    screenDistance, screenWidth, roundedDistance)
         // And the text - eg. 100 km
         distanceLabel.text = roundedDistanceFormatted(roundedDistance)
     }
     
+    // *************************************************************************
+    private func spanAdjustedForRotation(_ cameraHeading: CLLocationDirection,
+                                         _ mapView: MKMapView,
+                                         _ region: MKCoordinateRegion) -> Double {
+        // Keep heading between -90 and 90
+        // (could even keep it between 0 and 90 - all other cases are equivalent)
+        var heading = cameraHeading
+        if heading > 270 {
+            heading = 360 - heading
+        } else if heading > 90 {
+            heading = fabs(heading - 180)
+        }
+        // work out the region's span if the map was NOT rotated ..
+        let angleRad = Double.pi * heading / 180 // map rotation in radians
+        let width = Double(mapView.frame.width)
+        let height = Double(mapView.frame.height)
+        let heightOffset : Double = 20
+        // the offset (status bar height) which is taken by MapKit
+        // into consideration to calculate visible area height.
+        // calculating Longitude span corresponding to normal (non-rotated) width
+        let regionWidth = region.baseLeft().distance(from: region.baseRight())   // METRES
+        let spanStraight = width * regionWidth / (width * cos(angleRad)
+                            + (height - heightOffset) * sin(angleRad))
+        return spanStraight
+    }
+    // *************************************************************************
+
     private func roundedDistanceFormatted(_ roundedDistance: Int) -> String {
         return formatDistance(distance: roundedDistance)
     }
@@ -156,23 +182,5 @@ extension CGFloat {
             i+=1
         }
         return roundedDistance
-    }
-}
-
-// ******************************
-extension MKCoordinateRegion {
-
-    func baseLeft() -> CLLocationCoordinate2D {
-        
-        let baseMap = center.latitude - span.latitudeDelta/2.0
-        let leftMap = center.longitude - span.longitudeDelta/2.0
-        return CLLocationCoordinate2D(latitude: baseMap, longitude: leftMap)
-    }
-
-    func baseRight() -> CLLocationCoordinate2D {
-        
-        let baseMap = center.latitude - span.latitudeDelta/2.0
-        let rightMap = center.longitude + span.longitudeDelta/2.0
-        return CLLocationCoordinate2D(latitude: baseMap, longitude: rightMap)
     }
 }
