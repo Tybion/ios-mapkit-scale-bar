@@ -69,16 +69,16 @@ class ScaleBarView: UIView {
                 return
         }
         
-        let screenWidth = mapView.frame.width
-        let barWidth = self.frame.width
+        let screenWidth = mapView.frame.width       // width of mapView (pixels?)
+        let barWidth = self.frame.width             // width of scale bar (pixels?)
         
         // https://medium.com/@dmytrobabych/getting-actual-rotation-and-zoom-level-for-mapkit-mkmapview-e7f03f430aa9
         //  mapView.region is bigger than iPhone screen when rotated.
         // it is the ns-ew aligned bounding box of the rotated map
         
         // Get longitudes of west and east side of screen, at base of map.
-        let rect = mapView.visibleMapRect
-        let region = MKCoordinateRegion(rect)
+        let rect = mapView.visibleMapRect       // rectangle of mapView
+        let region = MKCoordinateRegion(rect)   // region for mapView
         
         var screenDistance: CLLocationDistance      // metres
         if mapView.camera.heading == 0 {
@@ -89,7 +89,7 @@ class ScaleBarView: UIView {
         } else {
             // for when map has been rotated within the screen
             screenDistance = spanAdjustedForRotation(
-                            mapView.camera.heading, mapView, region)
+                            mapView.camera.heading, mapView, region)    // METRES
         }
         
         let scaleBarDistance: CGFloat = barWidth/screenWidth * screenDistance
@@ -129,16 +129,12 @@ class ScaleBarView: UIView {
             heading = fabs(heading - 180)
         }
         // work out the region's span if the map was NOT rotated ..
-        let angleRad = Double.pi * heading / 180 // map rotation in radians
+        let radians = Double.pi * heading / 180 // map rotation in radians
         let width = Double(mapView.frame.width)
         let height = Double(mapView.frame.height)
-        let heightOffset : Double = 20
-        // the offset (status bar height) which is taken by MapKit
-        // into consideration to calculate visible area height.
-        // calculating Longitude span corresponding to normal (non-rotated) width
         let regionWidth = region.baseLeft().distance(from: region.baseRight())   // METRES
-        let spanStraight = width * regionWidth / (width * cos(angleRad)
-                            + (height - heightOffset) * sin(angleRad))
+        let spanStraight = width * regionWidth /
+                (width * cos(radians) + height * sin(radians))
         return spanStraight
     }
     // *************************************************************************
