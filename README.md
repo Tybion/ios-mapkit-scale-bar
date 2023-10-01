@@ -1,6 +1,7 @@
 # ios-mapkit-scale-bar
 Simple easy-to-read scale bar for MKMapView.  Text font, scale bar length and thickness are configurable. \
-Derived from https://github.com/yoman07/ios-google-maps-scale-bar for Mapkit, using Xcode 10.3 & Swift 5.
+Derived from https://github.com/yoman07/ios-google-maps-scale-bar for Mapkit, using Xcode 15 & Swift 5.\
+Extra code has been added so that the scale bar is correct now when the map view is rotated.\ 
 
 **ios-mapkit-scale-bar** \
 ![ScaleBarView](https://user-images.githubusercontent.com/4920031/63739451-93353000-c8d0-11e9-8c14-42455995a500.jpg)
